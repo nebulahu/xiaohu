@@ -43,7 +43,7 @@ function suc($data_to_merge=[]){
     return $data;
 }
 Route::get('/', function () {
-    return view('welcome');
+    return view('index');
 });
 /*用户api start*/
 Route::any('api',function(){
