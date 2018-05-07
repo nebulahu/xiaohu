@@ -46,6 +46,7 @@ class Question extends Model
             return ['status'=>1,'data'=>$this->find(rq('id'))];
         $limit = rq('limit')?:2;
         $skip = (rq('page')?rq('page')-1:0)*$limit;
+        list($limit,$skip) = paginate(rq('page'),rq('limit'));
         $list = $this->orderBy('created_at')
                 ->limit($limit)
                 ->skip($skip)

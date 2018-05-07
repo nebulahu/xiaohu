@@ -79,7 +79,72 @@ class User extends Model
         //dd(session()->all());
         return session('user_id')?:false;
     }
+    /*更改密码*/
+    public function change_password(){
+        if(!$this->is_logged_in())
+            return ['status'=>0,'msg'=>'user is not login'];
+        if(!rq('old_password') || !rq('new_password'))
+            return ['status'=>0,'msg'=>'old_password and new_password is not required'];
+        $user = $this->find(session('user_id'));
+        if(!Hash::check(rq('old_password'),$user->password))
+            return ['status'=>0,'msg'=>'invalid old_password'];
+        $user->password = Hash::make(rq('new_password'));
+        return $user->save()?['status'=>1]:['status'=>0,'msg'=>'db change failed'];
+    }
+    /*找回密码api*/
+    public function reset_password(){
+        if($this->is_robot())
+            return err('max frequency reached');
+        if(!rq('phone'))
+            return err('phone is required');
+        $user = $this->where('phone',rq('phone'))->first();
+        if(!$user)
+            return err('invalid phone number');
+        $captcha = $this->generate_captcha();
+        $user->phone_captcha = $captcha;
+        if($user->save()){
+            $this->send_sms();
+            $this->update_robot_time();
+            return suc();
+        }else{
+            return err('db change failed');
+        }
+    }
+    /*验证找回密码api*/
+    public function validate_reset_password(){
+        if($this->is_robot(2))
+            return err('max frequency reached');
+        if(!rq('phone') || !rq('phone_captcha') || !rq('new_password'))
+            return err('phone , phone captcha and new password is required');
+        $user = $this->where(['phone'=>rq('phone'),'phone_captcha'=>rq('phone_captcha')])->first();
+        if(!$user)
+            return err('invalid phone or invalid phone captcha');
+        $user->password = bcrypt(rq('new_password'));
+        $this->update_robot_time();
+        return $user->save()?suc():err('db change failed');
+    }
 
+    public function is_robot($time = 10){
+        if(!session('last_sms_time'))
+            return false;
+        $current_time = time();
+        $last_active_time = session('last_sms_time');
+        if($current_time - $last_active_time < $time)
+            return true;
+        return false;
+    }
+
+    public function update_robot_time(){
+        session()->set('last_sms_time',time());
+    }
+
+    /*生成随机数*/
+    public function generate_captcha(){
+        return rand(1000,9999);
+    }
+    public function send_sms(){
+        return true;
+    }
     public function answers(){
         return $this->belongsToMany('App\Answer')->withPivot('vote')->withTimestamps();
     }

@@ -262,6 +262,7 @@ class ComposerStaticInitb488da40541fab05acbb984997574e99
     );
 
     public static $classMap = array (
+        'AddFiledPhoneCaptcha' => __DIR__ . '/../..' . '/database/migrations/2018_05_07_030806_add_filed_phone_captcha.php',
         'CreateTableAnswerUser' => __DIR__ . '/../..' . '/database/migrations/2018_05_05_082735_create_table_answer_user.php',
         'CreateTableAnswers' => __DIR__ . '/../..' . '/database/migrations/2018_05_05_025932_create_table_answers.php',
         'CreateTableComments' => __DIR__ . '/../..' . '/database/migrations/2018_05_05_070320_create_table_comments.php',
