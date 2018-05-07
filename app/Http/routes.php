@@ -92,6 +92,9 @@ Route::any('api/comment/remove',function(){
     return comment_ins()->remove();
 });
 /*评论api end*/
+/*timeline start*/
+//Route::any('api/timeline',);
+/*timeline end*/
 Route::any('test',function(){
     dd(user_ins()->is_logged_in());
 });

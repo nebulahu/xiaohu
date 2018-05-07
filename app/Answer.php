@@ -60,16 +60,21 @@ class Answer extends Model
             ->keyBy("id");
         return ['status'=>1,'data'=>$answers];
     }
-
+    /*投票api*/
     public function vote(){
         if(!user_ins()->is_logged_in())
             return ['status'=>0,'msg'=>'用户未登录'];
         if(!rq('id') || !rq('vote'))
             return ['status'=>0,'msg'=>'id and vote is required'];
-        $answer = $this->(rq('id'));
+        $answer = $this->find(rq('id'));
         if(!$answer) return ['status'=>0,'msg'=>'answer not exists'];
+        $vote = rq('vote') <= 1 ? 1 : 2;
         /*检查相同问题下是否重复投票*/
+        $answer->users()->newPivotStatement()->where('user_id',session('user_id'))->where('answer_id',rq('id'))->delete();
+        $answer->users()->attach(session('user_id'),['vote' => (int)rq('vote')]);
+        return ['status'=>1];
     }
+
     public function users(){
         return $this->belongsToMany('App\User')->withPivot('vote')->withTimestamps();
     }
