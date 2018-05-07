@@ -36,10 +36,10 @@ function paginate($page=1,$limit=16){
 function err($msg=null){
     return ['status'=>0,'msg'=>$msg];
 }
-function suc($data_to_merge=null){
-    $data = ['status'=>1];
+function suc($data_to_merge=[]){
+    $data = ['status'=>1,'data'=>[]];
     if($data_to_merge)
-        $data = array_merge($data,$data_to_merge);
+        $data['data'] = array_merge($data['data'],$data_to_merge);
     return $data;
 }
 Route::get('/', function () {
@@ -72,6 +72,10 @@ Route::any('api/user/validate_reset_password',function(){
 
 Route::any('api/user/change_password',function(){
     return user_ins()->change_password();
+});
+
+Route::any('api/user/read',function(){
+    return user_ins()->read();
 });
 /*用户api end*/
 

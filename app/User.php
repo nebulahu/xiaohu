@@ -30,7 +30,19 @@ class User extends Model
         else
             return ['status'=>1,'msg'=>'db insert failed'];
     }
-
+    /*获取用户信息*/
+    public function read(){
+        if(!rq('id'))
+            return err('id required');
+        $get = ['id','username','avatar_url','intro'];
+        $user = $this->find(rq('id'),$get);
+        $data = $user->toArray();
+        $answer_count = answer_ins()->where('user_id',rq('id'))->count();
+        $question_count = question_ins()->where('user_id',rq('id'))->count();
+        $data['answer_count'] = $answer_count;
+        $data['question_count'] = $question_count;
+        return suc($data);
+    }
     /*login*/
     public function login(){
         $has_username_and_password = $this->has_username_and_password();
@@ -125,26 +137,28 @@ class User extends Model
     }
 
     public function is_robot($time = 10){
-        if(!session('last_sms_time'))
+        if(!session('last_action_time'))
             return false;
         $current_time = time();
-        $last_active_time = session('last_sms_time');
-        if($current_time - $last_active_time < $time)
+        $last_action_time = session('last_action_time');
+        if($current_time - $last_action_time < $time)
             return true;
         return false;
     }
 
     public function update_robot_time(){
-        session()->set('last_sms_time',time());
+        session()->set('last_action_time',time());
     }
 
     /*生成随机数*/
     public function generate_captcha(){
         return rand(1000,9999);
     }
+
     public function send_sms(){
         return true;
     }
+
     public function answers(){
         return $this->belongsToMany('App\Answer')->withPivot('vote')->withTimestamps();
     }
