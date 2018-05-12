@@ -69,4 +69,8 @@ class Question extends Model
             ['status'=>1]:
             ['status'=>0,'msg'=>'数据库删除失败'];
     }
+
+    public function users(){
+        return $this->belongsTo('App\User', 'user_id', 'id');
+    }
 }

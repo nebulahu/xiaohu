@@ -48,7 +48,7 @@ class Answer extends Model
         if(!rq('id') && !rq('question_id'))
             return ['status'=>0,'msg'=>'param error'];
         if(rq('id')){
-            $answer = $this->find(rq('id'));
+            $answer = $this->with('user')->with('users')->find(rq('id'));
             if(!$answer)
                 return ['status'=>0,'msg'=>'answer not exists'];
             return ['status'=>1,'data'=>$answer];
@@ -70,12 +70,15 @@ class Answer extends Model
         if(!$answer) return ['status'=>0,'msg'=>'answer not exists'];
         $vote = rq('vote') <= 1 ? 1 : 2;
         /*检查相同问题下是否重复投票*/
-        $answer->users()->newPivotStatement()->where('user_id',session('user_id'))->where('answer_id',rq('id'))->delete();
+        $answer->users()->newPivotStatement()->where(['user_id'=>session('user_id'),'answer_id'=>rq('id')])->delete();
         $answer->users()->attach(session('user_id'),['vote' => (int)rq('vote')]);
         return ['status'=>1];
     }
 
+    public function user(){
+        return $this->belongsTo('App\User', 'user_id', 'id');
+    }
     public function users(){
-        return $this->belongsToMany('App\User')->withPivot('vote')->withTimestamps();
+        return $this->belongsToMany('App\User','answer_user','answer_id','user_id')->withPivot('vote')->withTimestamps();
     }
 }

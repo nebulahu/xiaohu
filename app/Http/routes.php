@@ -30,8 +30,8 @@ function rq($key=null,$default=null){
 /*分页*/
 function paginate($page=1,$limit=16){
     $limit = $limit?:16;
-    $skip = ($page?$page-1:0)*$limit;
-    return [$limit,$page];
+    $skip = ($page?($page-1):0)*$limit;
+    return [$limit,$skip];
 }
 function err($msg=null){
     return ['status'=>0,'msg'=>$msg];
@@ -42,6 +42,11 @@ function suc($data_to_merge=[]){
         $data['data'] = array_merge($data['data'],$data_to_merge);
     return $data;
 }
+/*判断用户是否登录*/
+function is_logged_in(){
+    //dd(session()->all());
+    return session('user_id')?:false;
+}
 Route::get('/', function () {
     return view('index');
 });
@@ -50,15 +55,15 @@ Route::any('api',function(){
     return ['version'=>'1.0'];
 });
 
-Route::any('api/signup',function(){
+Route::any('api/user/signup',function(){
     return user_ins()->signup();
 });
 
-Route::any('api/login',function(){
+Route::any('api/user/login',function(){
     return user_ins()->login();
 });
 
-Route::any('api/logout',function(){
+Route::any('api/user/logout',function(){
     return user_ins()->logout();
 });
 
@@ -76,6 +81,10 @@ Route::any('api/user/change_password',function(){
 
 Route::any('api/user/read',function(){
     return user_ins()->read();
+});
+
+Route::any('api/user/exist',function(){
+    return user_ins()->exist();
 });
 /*用户api end*/
 
@@ -127,4 +136,16 @@ Route::any('api/timeline','CommonController@timeline');
 /*timeline end*/
 Route::any('test',function(){
     dd(user_ins()->is_logged_in());
+});
+Route::get('tpl/page/home',function(){
+    return view('page.home');
+});
+Route::get('tpl/page/signup',function(){
+    return view('page.signup');
+});
+Route::get('tpl/page/login',function(){
+    return view('page.login');
+});
+Route::get('tpl/page/question_add',function(){
+    return view('page.question_add');
 });

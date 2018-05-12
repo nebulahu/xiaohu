@@ -86,10 +86,15 @@ class User extends Model
             return [$username,$password];
         return false;
     }
+
+    public function exist(){
+        return suc(['count'=>$this->where(rq())->count()]);
+    }
+
     /*判断用户是否登录*/
     public function is_logged_in(){
         //dd(session()->all());
-        return session('user_id')?:false;
+        return is_logged_in();
     }
     /*更改密码*/
     public function change_password(){

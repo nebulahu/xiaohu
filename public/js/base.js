@@ -3,7 +3,13 @@
  */
 ;(function(){
     'use strict';
-    angular.module('xiaohu',['ui.router'])
+    angular.module('xiaohu',[
+        'ui.router',
+        'common',
+        'question',
+        'user',
+        'answer'
+    ])
         .config(['$interpolateProvider',
             '$stateProvider',
             '$urlRouterProvider',
@@ -16,29 +22,25 @@
             $stateProvider
                 .state('home',{
                     url:'/home',
-                    templateUrl:'home.tpl'
+                    templateUrl:'/tpl/page/home'
                 })
                 .state('signup',{
                     url:'/signup',
-                    templateUrl:'signup.tpl'
+                    templateUrl:'/tpl/page/signup'
                 })
                 .state('login',{
                     url:'/login',
-                    templateUrl:'login.tpl'
+                    templateUrl:'/tpl/page/login'
                 })
-        }])
-        .service('UserService',[
-            function(){
-                var me = this;
-                me.signup_data = {};
-                me.signup = function(){
 
-                }
-        }])
-        .controller('SignupController',[
-            '$scope',
-            'UserService',
-            function($scope,UserService){
-                $scope.User = UserService;
+                .state('question',{
+                    abstract:true,
+                    url:'/question',
+                    template:'<div ui-view></div>'
+                })
+                .state('question.add',{
+                    url:'/add',
+                    templateUrl:'/tpl/page/question_add'
+                })
         }])
 })();
