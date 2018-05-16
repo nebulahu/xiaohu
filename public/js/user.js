@@ -3,7 +3,10 @@
  */
 ;(function (){
     'use strict';
-    angular.module('user',[])
+    angular.module('user',[
+            'answer',
+            'question',
+        ])
         .service('UserService',[
             '$state',
             '$http',
@@ -11,6 +14,22 @@
                 var me = this;
                 me.signup_data = {};
                 me.login_data = {};
+                me.data = {};
+                me.read = function(id){
+                    return $http.post('/api/user/read',{id:id})
+                        .then(function(r){
+                            //console.log('r',r);
+                            if(r.data.status){
+                                me.current_user = r.data.data;
+                                // if(id === 'self')
+                                //     me.data.self = r.data.data;
+                            }else{
+                                if(r.data.msg == 'invaild or login requried')
+                                    $state.go('login');
+                            }
+                        })
+                }
+
                 me.signup = function(){
                     $http.post('/api/user/signup',me.signup_data)
                         .then(function(r){
@@ -45,7 +64,7 @@
                             console.log('e',e);
                         })
                 }
-            }])
+        }])
         .controller('SignupController',[
             '$scope',
             'UserService',
@@ -57,12 +76,33 @@
                     if(n.username != o.username)
                         return UserService.username_exists();
                 },true);
-            }])
+        }])
 
         .controller('LoginController',[
             '$scope',
             'UserService',
             function($scope,UserService){
                 $scope.User = UserService;
-            }])
+        }])
+
+        .controller('UserController',[
+            '$scope',
+            '$stateParams',
+            'UserService',
+            'AnswerService',
+            'QuestionService',
+            function($scope,$stateParams,UserService,AnswerService,QuestionService){
+                $scope.User = UserService;
+                UserService.read($stateParams.id);
+                QuestionService.read({user_id:$stateParams.id})
+                    .then(function(r){
+                        if(r)
+                            UserService.his_questions = r;
+                })
+                AnswerService.read({user_id:$stateParams.id})
+                    .then(function(r){
+                        if(r)
+                            UserService.his_answers = r;
+                })
+        }])
 })();

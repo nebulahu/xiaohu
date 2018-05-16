@@ -34,11 +34,15 @@ class User extends Model
     public function read(){
         if(!rq('id'))
             return err('id required');
+        $user_id = rq('id') === 'self'?session('user_id'):rq('id');
+        if(!$user_id){
+            return err('invaild or login requried');
+        }
         $get = ['id','username','avatar_url','intro'];
-        $user = $this->find(rq('id'),$get);
+        $user = $this->find($user_id,$get);
         $data = $user->toArray();
-        $answer_count = answer_ins()->where('user_id',rq('id'))->count();
-        $question_count = question_ins()->where('user_id',rq('id'))->count();
+        $answer_count = answer_ins()->where('user_id',$user_id)->count();
+        $question_count = question_ins()->where('user_id',$user_id)->count();
         $data['answer_count'] = $answer_count;
         $data['question_count'] = $question_count;
         return suc($data);

@@ -11,8 +11,10 @@
                 var me = this;
                 me.data = [];
                 me.current_page = 1;
+                me.no_more_data = false;
+                /*获取首页数据*/
                 me.get = function (conf){
-                    if(me.pending) return;
+                    if(me.pending || me.no_more_data) return;
                     me.pending = true;
                     conf = conf || {page:me.current_page};
                     $http.post('/api/timeline',conf)
@@ -20,6 +22,7 @@
                             if(r.data.status){
                                 if(r.data.data.length){
                                     me.data = me.data.concat(r.data.data);
+                                    /*统计票数*/
                                     me.data = AnswerService.count_vote(me.data);
                                     me.current_page++;
                                 }else{
@@ -36,11 +39,18 @@
                 }
 
                 me.vote = function(conf){
-                    AnswerService.vote(conf)
-                        .then(function(r){
-                            if(r)
-                                AnswerService.update_data(conf.id);
+                    var $r = AnswerService.vote(conf)
+                        if($r)
+                            $r.then(function(r){
+                                if(r)
+                                    AnswerService.update_data(conf.id);
                         })
+                }
+
+                me.reset_state = function(){
+                    me.data = [];
+                    me.current_page = 1;
+                    me.no_more_data = false;
                 }
             }
         ])
@@ -51,6 +61,7 @@
             function($scope,TimelineService,AnswerService){
                 var $win;
                 $scope.Timeline = TimelineService;
+                TimelineService.reset_state();
                 TimelineService.get();
                 $win = $(window);
                 $win.on('scroll',function(){

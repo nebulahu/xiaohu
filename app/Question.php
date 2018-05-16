@@ -41,11 +41,22 @@ class Question extends Model
             ['status'=>0,'msg'=>'数据库更新失败'];
     }
 
+    public function read_by_user_id($user_id){
+        $user = user_ins()->find($user_id);
+        if(!$user)
+            return err('用户不存在');
+        return suc($this->where('user_id',$user_id)->get()->keyBy("id")->toArray());
+    }
+
     public function read(){
         if(rq('id'))
-            return ['status'=>1,'data'=>$this->find(rq('id'))];
-        $limit = rq('limit')?:2;
-        $skip = (rq('page')?rq('page')-1:0)*$limit;
+            return ['status'=>1,'data'=>$this->with('answers_with_user_info')->find(rq('id'))];
+//        $limit = rq('limit')?:2;
+//        $skip = (rq('page')?rq('page')-1:0)*$limit;
+        if(rq('user_id')){
+            $user_id = rq('user_id') === 'self'?session('user_id'):rq('user_id');
+            return $this->read_by_user_id($user_id);
+        }
         list($limit,$skip) = paginate(rq('page'),rq('limit'));
         $list = $this->orderBy('created_at')
                 ->limit($limit)
@@ -70,7 +81,15 @@ class Question extends Model
             ['status'=>0,'msg'=>'数据库删除失败'];
     }
 
-    public function users(){
+    public function user(){
         return $this->belongsTo('App\User', 'user_id', 'id');
+    }
+
+    public function answers(){
+        return $this->hasMany('App\Answer');
+    }
+
+    public function answers_with_user_info(){
+        return $this->answers()->with('user')->with('users');
     }
 }

@@ -36,10 +36,10 @@ function paginate($page=1,$limit=16){
 function err($msg=null){
     return ['status'=>0,'msg'=>$msg];
 }
-function suc($data_to_merge=[]){
+function suc($data_to_add=[]){
     $data = ['status'=>1,'data'=>[]];
-    if($data_to_merge)
-        $data['data'] = array_merge($data['data'],$data_to_merge);
+    if($data_to_add)
+        $data['data'] = $data_to_add;
     return $data;
 }
 /*判断用户是否登录*/
@@ -116,6 +116,9 @@ Route::any('api/answer/change',function(){
 Route::any('api/answer/read',function(){
     return answer_ins()->read();
 });
+Route::any('api/answer/remove',function(){
+    return answer_ins()->remove();
+});
 Route::any('api/answer/vote',function(){
     return answer_ins()->vote();
 });
@@ -137,6 +140,7 @@ Route::any('api/timeline','CommonController@timeline');
 Route::any('test',function(){
     dd(user_ins()->is_logged_in());
 });
+/*页面路由*/
 Route::get('tpl/page/home',function(){
     return view('page.home');
 });
@@ -148,4 +152,10 @@ Route::get('tpl/page/login',function(){
 });
 Route::get('tpl/page/question_add',function(){
     return view('page.question_add');
+});
+Route::get('tpl/page/question_detail',function(){
+    return view('page.question_detail');
+});
+Route::get('tpl/page/user',function(){
+    return view('page.user');
 });
